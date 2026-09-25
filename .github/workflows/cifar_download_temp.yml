@@ -1,0 +1,19 @@
+name: CIFAR Download Temp
+on:
+  push:
+    branches:
+      - chatgpt-cifar-download-temp
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download CIFAR-10
+        run: |
+          curl -L --fail --retry 3 -o cifar-10-python.tar.gz https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
+          ls -lh cifar-10-python.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cifar10-raw
+          path: cifar-10-python.tar.gz
+          retention-days: 1
