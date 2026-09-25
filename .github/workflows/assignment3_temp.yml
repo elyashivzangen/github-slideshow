@@ -23,9 +23,23 @@ jobs:
         run: |
           cat a3part_00 a3part_01 a3part_02 a3part_03 a3part_04 a3part_05 a3part_06 a3part_07 a3part_08 | base64 -d > assignment3_workflow.py
           python -m py_compile assignment3_workflow.py
-      - name: Build and execute notebook
+      - name: Build notebook
         run: |
           python assignment3_workflow.py
+          python - <<'PY'
+          import nbformat
+          p='assignment3.ipynb'
+          nb=nbformat.read(p,as_version=4)
+          for cell in nb.cells:
+              if cell.cell_type=='code' and 'from torchvision import datasets, transforms' in cell.source:
+                  cell.source = 'import random\nfrom pathlib import Path\n' + cell.source
+                  break
+          else:
+              raise RuntimeError('CIFAR import cell not found')
+          nbformat.write(nb,p)
+          PY
+      - name: Execute notebook
+        run: |
           jupyter nbconvert --to notebook --execute assignment3.ipynb --output Assignment3_Neural_Networks.ipynb --ExecutePreprocessor.timeout=-1
       - name: Validate execution
         run: |
